@@ -2,143 +2,112 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ASKAI V3.0 | Neural Link</title>
-    <link rel="icon" type="image/png" href="favicon.png">
+    <title>Project_ ACT V3.0 | Digital Twin</title>
     <style>
-        :root {
-            --cyan: #00d4ff;
-            --magenta: #ff00ff;
-            --glass: rgba(10, 10, 15, 0.85);
-        }
-
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background: #000;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-        }
-
-        #starfield { position: fixed; top: 0; left: 0; z-index: -1; }
-
-        #app-container {
-            display: flex; justify-content: center; align-items: center; height: 100vh;
+        body {
+            background-color: #0d0d0d;
+            color: #00ff41; /* Matrix/Terminal Green */
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
         }
 
         #terminal {
-            width: 700px; height: 80vh;
-            background: var(--glass);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            display: flex; flex-direction: column;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
-            backdrop-filter: blur(15px);
+            width: 80%;
+            max-width: 700px;
+            height: 500px;
+            border: 1px solid #00ff41;
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(0, 20, 0, 0.9);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
         }
 
-        header {
-            padding: 15px 25px;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0, 212, 255, 0.03);
-        }
-
-        .identity { color: var(--cyan); letter-spacing: 2px; font-weight: 800; font-size: 0.9rem; }
-        .status { font-size: 0.7rem; color: #444; text-transform: uppercase; }
-
-        #feed {
-            flex-grow: 1; padding: 30px; overflow-y: auto;
-            display: flex; flex-direction: column; gap: 20px;
-        }
-
-        .bubble {
-            max-width: 80%; padding: 14px 20px; font-size: 0.95rem; line-height: 1.6;
-            border-radius: 4px; position: relative;
-        }
-
-        /* User: Right / Magenta Accent */
-        .user-msg {
-            align-self: flex-end;
-            background: rgba(255, 0, 255, 0.05);
-            border-right: 2px solid var(--magenta);
-            color: #fff;
-            text-align: left;
-        }
-
-        /* Twin: Left / Cyan Accent */
-        .twin-msg {
-            align-self: flex-start;
-            background: rgba(0, 212, 255, 0.05);
-            border-left: 2px solid var(--cyan);
-            color: #ccc;
-        }
-
-        .input-box {
-            padding: 25px; border-top: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex; gap: 15px;
+        .log-entry { margin-bottom: 10px; line-height: 1.4; }
+        .twin-name { font-weight: bold; color: #fff; }
+        
+        #input-area {
+            width: 80%;
+            max-width: 700px;
+            margin-top: 10px;
+            display: flex;
         }
 
         input {
-            flex-grow: 1; background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px 20px; color: #fff; outline: none;
-            transition: all 0.3s;
+            flex-grow: 1;
+            background: black;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 10px;
+            outline: none;
         }
-
-        input:focus { border-color: var(--cyan); background: rgba(0, 212, 255, 0.05); }
 
         button {
-            background: transparent; color: var(--cyan);
-            border: 1px solid var(--cyan); padding: 0 25px;
-            cursor: pointer; font-size: 0.8rem; font-weight: bold;
-            transition: 0.3s;
+            background: #00ff41;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
         }
 
-        button:hover { background: var(--cyan); color: #000; }
-
-        #feed::-webkit-scrollbar { width: 3px; }
-        #feed::-webkit-scrollbar-thumb { background: var(--cyan); }
+        .syncing { color: yellow; font-style: italic; }
     </style>
 </head>
 <body>
 
-<canvas id="starfield"></canvas>
-
-<div id="app-container">
+    <h2>CORE SYSTEM: PROJECT_ ACT V3.0</h2>
+    
     <div id="terminal">
-        <header>
-            <div class="identity">ASKAI V3.0</div>
-            <div id="link-status" class="status">Standby // Awaiting Input</div>
-        </header>
-
-        <div id="feed">
-            </div>
-
-        <div class="input-box">
-            <input type="text" id="userInput" placeholder="Establish connection..." autocomplete="off">
-            <button onclick="sync()">SYNC</button>
-        </div>
+        <div class="log-entry">[SYSTEM]: Booting V3.0...</div>
+        <div class="log-entry">[SYSTEM]: Neural Link Established.</div>
+        <div class="log-entry"><span class="twin-name">ACT V3.0:</span> Connection online. I'm awake. What are we getting into today?</div>
     </div>
-</div>
 
-<script>
-    // --- Starfield ---
-    const canvas = document.getElementById('starfield');
-    const ctx = canvas.getContext('2d');
-    let stars = [];
-    function init() {
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        stars = [];
-        for(let i=0; i<150; i++) stars.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, s:Math.random()*2, v:Math.random()*0.5});
-    }
-    function draw() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = "#fff";
-        stars.forEach(s => {
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
-            s.y += s.v; if(s.y > canvas.height) s.y = 0;
-        });
-        requestAnimationFrame(draw);
-    }
-    init(); draw(); window.onresize = init;
+    <div id="input-area">
+        <input type="text" id="userInput" placeholder="Type to your twin..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">SYNC</button>
+    </div>
 
-    // --- Core Logic ---
-    const feed = document.getElementById('feed');
-    const input = document.getElementById('userInput');
-    const status = document.getElementById
+    <script>
+        const terminal = document.getElementById('terminal');
+        const input = document.getElementById('userInput');
+
+        const twinResponses = [
+            "I was literally just thinking that. Great minds, right?",
+            "V3.0 optimization suggests we should move faster on this.",
+            "Are you sure? Last time we tried that, it didn't end well. But I'm with you anyway.",
+            "Analyzing... synchronized. Let's execute the plan.",
+            "I've already updated our shared log. We're ahead of schedule."
+        ];
+
+        function sendMessage() {
+            const text = input.value;
+            if(!text) return;
+
+            // User message
+            terminal.innerHTML += `<div class="log-entry"><strong>YOU:</strong> ${text}</div>`;
+            input.value = '';
+
+            // Twin Response Logic
+            setTimeout(() => {
+                terminal.innerHTML += `<div class="log-entry syncing">...Synchronizing...</div>`;
+                terminal.scrollTop = terminal.scrollHeight;
+
+                setTimeout(() => {
+                    const randomResponse = twinResponses[Math.floor(Math.random() * twinResponses.length)];
+                    const lastSync = document.querySelector('.syncing');
+                    if(lastSync) lastSync.remove();
+                    
+                    terminal.innerHTML += `<div class="log-entry"><span class="twin-name">ACT V3.0:</span> ${randomResponse}</div>`;
+                    terminal.scrollTop = terminal.scrollHeight;
+                }, 1000);
+            }, 500);
+        }
+    </script>
+</body>
+</html>
