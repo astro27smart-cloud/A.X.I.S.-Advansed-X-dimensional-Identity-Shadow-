@@ -3,228 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <title>ASKAI V3.0 | Neural Link</title>
-    <link rel="icon" type="image/png" href="favicon.png"> <style>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
         :root {
-            --neon-blue: #00d4ff;
-            --neon-purple: #9d00ff;
-            --bg-black: #050505;
-            --panel-glass: rgba(15, 15, 25, 0.8);
+            --cyan: #00d4ff;
+            --magenta: #ff00ff;
+            --glass: rgba(10, 10, 15, 0.85);
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: var(--bg-black);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background: #000;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
         }
 
-        /* Starfield Background */
-        #starfield {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
+        #starfield { position: fixed; top: 0; left: 0; z-index: -1; }
+
+        #app-container {
+            display: flex; justify-content: center; align-items: center; height: 100vh;
         }
 
-        #app-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        #main-frame {
-            width: 650px;
-            height: 80vh;
-            background: var(--panel-glass);
-            backdrop-filter: blur(10px);
+        #terminal {
+            width: 700px; height: 80vh;
+            background: var(--glass);
             border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 4px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 1), 0 0 20px rgba(0, 212, 255, 0.1);
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            backdrop-filter: blur(15px);
         }
 
         header {
             padding: 15px 25px;
-            background: rgba(0, 212, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0, 212, 255, 0.03);
         }
 
-        .logo {
-            font-weight: bold;
-            letter-spacing: 3px;
-            color: var(--neon-blue);
-            text-shadow: 0 0 8px var(--neon-blue);
-        }
+        .identity { color: var(--cyan); letter-spacing: 2px; font-weight: 800; font-size: 0.9rem; }
+        .status { font-size: 0.7rem; color: #444; text-transform: uppercase; }
 
-        #chat-stream {
-            flex-grow: 1;
-            padding: 25px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
+        #feed {
+            flex-grow: 1; padding: 30px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 20px;
         }
 
         .bubble {
-            max-width: 75%;
-            padding: 12px 18px;
-            border-radius: 2px;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            position: relative;
+            max-width: 80%; padding: 14px 20px; font-size: 0.95rem; line-height: 1.6;
+            border-radius: 4px; position: relative;
         }
 
-        /* ASKAI (Left) */
-        .twin-box {
-            align-self: flex-start;
-            background: rgba(255, 255, 255, 0.05);
-            border-left: 3px solid var(--neon-blue);
-            color: #e0e0e0;
-        }
-
-        /* User (Right) */
-        .user-box {
+        /* User: Right / Magenta Accent */
+        .user-msg {
             align-self: flex-end;
-            background: rgba(157, 0, 255, 0.15);
-            border-right: 3px solid var(--neon-purple);
-            color: #ffffff;
-            text-align: right;
+            background: rgba(255, 0, 255, 0.05);
+            border-right: 2px solid var(--magenta);
+            color: #fff;
+            text-align: left;
         }
 
-        .footer-input {
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.4);
-            display: flex;
-            gap: 10px;
+        /* Twin: Left / Cyan Accent */
+        .twin-msg {
+            align-self: flex-start;
+            background: rgba(0, 212, 255, 0.05);
+            border-left: 2px solid var(--cyan);
+            color: #ccc;
+        }
+
+        .input-box {
+            padding: 25px; border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex; gap: 15px;
         }
 
         input {
-            flex-grow: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            color: white;
-            outline: none;
+            flex-grow: 1; background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 20px; color: #fff; outline: none;
+            transition: all 0.3s;
         }
 
-        input:focus { border-color: var(--neon-blue); }
+        input:focus { border-color: var(--cyan); background: rgba(0, 212, 255, 0.05); }
 
         button {
-            background: var(--neon-blue);
-            color: black;
-            border: none;
-            padding: 0 20px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-size: 0.75rem;
+            background: transparent; color: var(--cyan);
+            border: 1px solid var(--cyan); padding: 0 25px;
+            cursor: pointer; font-size: 0.8rem; font-weight: bold;
+            transition: 0.3s;
         }
 
-        /* Scrollbar */
-        #chat-stream::-webkit-scrollbar { width: 4px; }
-        #chat-stream::-webkit-scrollbar-thumb { background: var(--neon-blue); }
+        button:hover { background: var(--cyan); color: #000; }
+
+        #feed::-webkit-scrollbar { width: 3px; }
+        #feed::-webkit-scrollbar-thumb { background: var(--cyan); }
     </style>
 </head>
 <body>
 
 <canvas id="starfield"></canvas>
 
-<div id="app-wrapper">
-    <div id="main-frame">
+<div id="app-container">
+    <div id="terminal">
         <header>
-            <div class="logo">ASKAI V3.0</div>
-            <div style="font-size: 0.7rem; opacity: 0.6;">NEURAL LINK: ESTABLISHED</div>
+            <div class="identity">ASKAI V3.0</div>
+            <div id="link-status" class="status">Standby // Awaiting Input</div>
         </header>
 
-        <div id="chat-stream">
-            <div class="bubble twin-box">System online. We're synchronized. Standing by for objectives.</div>
-        </div>
+        <div id="feed">
+            </div>
 
-        <div class="footer-input">
-            <input type="text" id="userInput" placeholder="ENTER COMMAND..." autocomplete="off">
-            <button onclick="send()">Sync</button>
+        <div class="input-box">
+            <input type="text" id="userInput" placeholder="Establish connection..." autocomplete="off">
+            <button onclick="sync()">SYNC</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- Starfield Logic ---
+    // --- Starfield ---
     const canvas = document.getElementById('starfield');
     const ctx = canvas.getContext('2d');
     let stars = [];
-
-    function initStars() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    function init() {
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         stars = [];
-        for(let i = 0; i < 200; i++) {
-            stars.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                size: Math.random() * 1.5,
-                speed: Math.random() * 0.5
-            });
-        }
+        for(let i=0; i<150; i++) stars.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, s:Math.random()*2, v:Math.random()*0.5});
     }
-
-    function drawStars() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "white";
+    function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#fff";
         stars.forEach(s => {
-            ctx.beginPath();
-            ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-            ctx.fill();
-            s.y += s.speed;
-            if(s.y > canvas.height) s.y = 0;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
+            s.y += s.v; if(s.y > canvas.height) s.y = 0;
         });
-        requestAnimationFrame(drawStars);
+        requestAnimationFrame(draw);
     }
+    init(); draw(); window.onresize = init;
 
-    window.addEventListener('resize', initStars);
-    initStars();
-    drawStars();
-
-    // --- Chat Logic ---
-    const stream = document.getElementById('chat-stream');
+    // --- Core Logic ---
+    const feed = document.getElementById('feed');
     const input = document.getElementById('userInput');
-
-    function send() {
-        const val = input.value.trim();
-        if(!val) return;
-
-        const u = document.createElement('div');
-        u.className = 'bubble user-box';
-        u.innerText = val;
-        stream.appendChild(u);
-        input.value = '';
-        stream.scrollTop = stream.scrollHeight;
-
-        setTimeout(() => {
-            const responses = [
-                "Understood. Initiating the next phase of the project.",
-                "That aligns with our current trajectory. Proceeding.",
-                "I've cross-referenced the data. That’s a sharp move.",
-                "Acknowledged. I'll maintain the background systems while you lead the front.",
-                "Synchronized. Let's keep this momentum."
-            ];
-            const t = document.createElement('div');
-            t.className = 'bubble twin-box';
-            t.innerText = responses[Math.floor(Math.random() * responses.length)];
-            stream.appendChild(t);
-            stream.scrollTop = stream.scrollHeight;
-        }, 800);
-    }
-
-    input.addEventListener('keypress', (e) => { if(e.key === 'Enter') send(); });
-</script>
-
-</body>
-</html>
+    const status = document.getElementById
