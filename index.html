@@ -10,9 +10,12 @@
         
         /* Sidebar */
         #sidebar { width: 280px; background: rgba(0, 0, 0, 0.9); border-right: 1px solid rgba(0, 212, 255, 0.1); display: flex; flex-direction: column; backdrop-filter: blur(15px); z-index: 10; }
-        .nav-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .nav-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 10px; }
         #new-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--cyan); color: var(--cyan); cursor: pointer; font-weight: bold; letter-spacing: 1px; transition: 0.3s; }
         #new-btn:hover { background: var(--cyan); color: black; }
+        #clear-mem-btn { width: 100%; padding: 8px; background: transparent; border: 1px solid #444; color: #888; cursor: pointer; font-size: 0.7rem; transition: 0.3s; }
+        #clear-mem-btn:hover { border-color: #ff4444; color: #ff4444; }
+        
         #chat-list { flex-grow: 1; overflow-y: auto; padding: 15px; }
         .chat-item { padding: 12px; margin-bottom: 8px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border-left: 2px solid transparent; }
         .chat-item:hover { background: rgba(255,255,255,0.07); }
@@ -41,7 +44,10 @@
 <canvas id="starfield"></canvas>
 
 <div id="sidebar">
-    <div class="nav-header"><button id="new-btn" onclick="startFresh()">INITIALIZE SYNC</button></div>
+    <div class="nav-header">
+        <button id="new-btn" onclick="startFresh()">INITIALIZE SYNC</button>
+        <button id="clear-mem-btn" onclick="clearGlobalMemory()">WIPE CORE DIRECTIVES</button>
+    </div>
     <div id="chat-list"></div>
 </div>
 
@@ -60,7 +66,7 @@
 </div>
 
 <script>
-    // Starfield (Essential for vibe)
+    // Starfield Animation
     const canvas = document.getElementById('starfield');
     const ctx = canvas.getContext('2d');
     let stars = [];
@@ -73,13 +79,26 @@
         stars.forEach(s => { ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill(); s.y += s.v; if(s.y > canvas.height) s.y = 0; });
         requestAnimationFrame(draw);
     }
-    init(); draw();
+    init(); draw(); window.onresize = init;
 
-    // The Twin Brain Logic
+    // Logic & Memory
     let chats = JSON.parse(localStorage.getItem('atlas_v3_data')) || [];
+    let globalMemory = localStorage.getItem('atlas_permanent_memory') || "";
     let activeId = null;
 
-    function save() { localStorage.setItem('atlas_v3_data', JSON.stringify(chats)); render(); }
+    function save() { 
+        localStorage.setItem('atlas_v3_data', JSON.stringify(chats)); 
+        localStorage.setItem('atlas_permanent_memory', globalMemory);
+        render(); 
+    }
+
+    function clearGlobalMemory() {
+        if(confirm("Wipe all 'From now on' permanent rules?")) {
+            globalMemory = "";
+            save();
+            document.getElementById('status').innerText = "MEMORY WIPED";
+        }
+    }
 
     function startFresh() {
         activeId = null;
@@ -132,7 +151,13 @@
         const text = input.value.trim();
         if(!text) return;
 
-        // If this is the start of a brand new conversation
+        // Check for "From now on" rule
+        if (text.toLowerCase().includes("from now on")) {
+            const newRule = text.split(/from now on/i)[1];
+            globalMemory += ` [Rule: ${newRule}] `;
+            document.getElementById('status').innerText = "CORE UPDATED";
+        }
+
         if(activeId === null) {
             activeId = Date.now();
             chats.unshift({ id: activeId, name: text.substring(0, 25), history: [] });
@@ -148,7 +173,11 @@
             const res = await fetch('/api/sync', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ prompt: text, history: currentChat.history })
+                body: JSON.stringify({ 
+                    prompt: text, 
+                    history: currentChat.history,
+                    globalMemory: globalMemory 
+                })
             });
             const data = await res.json();
             addUI(data.text, 'twin');
