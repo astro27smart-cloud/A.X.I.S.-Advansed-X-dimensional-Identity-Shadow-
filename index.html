@@ -5,161 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ATLAS V3.0 | Neural Link</title>
     <style>
-        :root { 
-            --cyan: #00d4ff; 
-            --mag: #ff00ff; 
-            --bg: #020205; 
-            --glass: rgba(10, 10, 15, 0.85); 
-        }
-
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            overflow: hidden; background: var(--bg); 
-            font-family: 'Inter', -apple-system, sans-serif; 
-            color: white; display: flex; 
-        }
-
-        #starfield { 
-            position: fixed; top: 0; left: 0; z-index: -1; 
-            width: 100%; height: 100%; 
-            background: radial-gradient(circle at center, #0a0a20 0%, #020205 100%); 
-        }
+        :root { --cyan: #00d4ff; --mag: #ff00ff; --bg: #020205; --glass: rgba(10, 10, 15, 0.95); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Inter', sans-serif; color: white; display: flex; }
+        #starfield { position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%; background: radial-gradient(circle at center, #0a0a20 0%, #020205 100%); }
         
-        /* Sidebar Navigation */
-        #sidebar { 
-            width: 280px; background: rgba(0, 0, 0, 0.85); 
-            border-right: 1px solid rgba(0, 212, 255, 0.1); 
-            display: flex; flex-direction: column; 
-            backdrop-filter: blur(20px); z-index: 10; 
-        }
-
-        .nav-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        #new-btn { 
-            width: 100%; padding: 12px; background: transparent; 
-            border: 1px solid var(--cyan); color: var(--cyan); 
-            cursor: pointer; font-weight: bold; letter-spacing: 1px; 
-            transition: 0.3s; text-transform: uppercase;
-        }
-
+        /* Sidebar */
+        #sidebar { width: 280px; background: rgba(0, 0, 0, 0.9); border-right: 1px solid rgba(0, 212, 255, 0.1); display: flex; flex-direction: column; backdrop-filter: blur(20px); z-index: 10; }
+        .nav-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 10px; }
+        #new-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--cyan); color: var(--cyan); cursor: pointer; font-weight: bold; transition: 0.3s; }
         #new-btn:hover { background: var(--cyan); color: black; }
         
+        /* Core Data Trigger */
+        #mem-trigger { font-size: 0.7rem; color: var(--mag); cursor: pointer; text-align: center; margin-top: 10px; letter-spacing: 1px; opacity: 0.7; transition: 0.3s; }
+        #mem-trigger:hover { opacity: 1; text-shadow: 0 0 10px var(--mag); }
+
         #chat-list { flex-grow: 1; overflow-y: auto; padding: 15px; }
+        .chat-item { padding: 12px; margin-bottom: 8px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: center; border-left: 2px solid transparent; }
+        .chat-item.active { border-left-color: var(--cyan); background: rgba(0, 212, 255, 0.05); }
 
-        .chat-item { 
-            padding: 12px; margin-bottom: 8px; border-radius: 4px; 
-            font-size: 0.85rem; cursor: pointer; 
-            background: rgba(255,255,255,0.02); 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-left: 2px solid transparent; transition: 0.2s;
-        }
-
-        .chat-item.active { 
-            border-left-color: var(--cyan); 
-            background: rgba(0, 212, 255, 0.08); 
-        }
-
-        .del-btn { opacity: 0.3; color: #ff4444; cursor: pointer; }
-        .chat-item:hover .del-btn { opacity: 1; }
-
-        /* Main Interface */
+        /* Main Terminal */
         #app { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
-
-        #terminal { 
-            width: 92%; height: 88vh; background: var(--glass); 
-            border: 1px solid rgba(0, 212, 255, 0.1); 
-            display: flex; flex-direction: column; 
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-        }
-
-        header { 
-            padding: 15px 25px; border-bottom: 1px solid rgba(255,255,255,0.05); 
-            display: flex; justify-content: space-between; align-items: center;
-        }
-
-        #feed { 
-            flex-grow: 1; padding: 30px; overflow-y: auto; 
-            display: flex; flex-direction: column; gap: 20px; 
-            scroll-behavior: smooth;
-        }
-
-        .bubble { 
-            max-width: 75%; padding: 16px 22px; border-radius: 2px; 
-            font-size: 0.95rem; line-height: 1.6; 
-        }
-
-        .user { 
-            align-self: flex-end; border-right: 3px solid var(--mag); 
-            background: rgba(255, 0, 255, 0.03); 
-        }
-
-        .twin { 
-            align-self: flex-start; border-left: 3px solid var(--cyan); 
-            background: rgba(0, 212, 255, 0.03); color: #ececec;
-        }
-        
+        #terminal { width: 92%; height: 88vh; background: var(--glass); border: 1px solid rgba(0, 212, 255, 0.1); display: flex; flex-direction: column; }
+        #feed { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        .bubble { max-width: 80%; padding: 15px 20px; border-radius: 2px; font-size: 0.95rem; line-height: 1.5; }
+        .user { align-self: flex-end; border-right: 3px solid var(--mag); background: rgba(255, 0, 255, 0.02); }
+        .twin { align-self: flex-start; border-left: 3px solid var(--cyan); background: rgba(0, 212, 255, 0.02); }
         .input-area { padding: 25px; display: flex; gap: 10px; background: rgba(0,0,0,0.3); }
+        input { flex-grow: 1; background: transparent; border: 1px solid #333; padding: 15px; color: white; outline: none; }
 
-        input { 
-            flex-grow: 1; background: rgba(255,255,255,0.03); 
-            border: 1px solid #333; padding: 16px; color: white; 
-            outline: none; transition: 0.3s;
-        }
-
-        input:focus { border-color: var(--cyan); }
+        /* Memory Modal */
+        #mem-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        #mem-box { width: 500px; background: #050505; border: 1px solid var(--mag); padding: 30px; box-shadow: 0 0 50px rgba(255, 0, 255, 0.1); }
+        #mem-area { width: 100%; height: 300px; background: #000; color: var(--cyan); border: 1px solid #222; padding: 15px; font-family: monospace; font-size: 0.8rem; margin: 15px 0; outline: none; box-sizing: border-box; }
+        .mem-btns { display: flex; justify-content: space-between; }
+        .close-btn { background: #222; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+        .save-btn { background: var(--mag); color: black; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-
 <canvas id="starfield"></canvas>
+
+<div id="mem-modal">
+    <div id="mem-box">
+        <h2 style="color:var(--mag); margin-top:0; font-size: 1rem; letter-spacing: 2px;">CORE DATA REPOSITORY</h2>
+        <p style="font-size: 0.7rem; opacity: 0.6;">All extracted details and permanent instructions are stored here.</p>
+        <textarea id="mem-area"></textarea>
+        <div class="mem-btns">
+            <button class="close-btn" onclick="toggleMem()">CLOSE</button>
+            <button class="save-btn" onclick="saveManualMem()">COMMIT TO CORE</button>
+        </div>
+    </div>
+</div>
 
 <div id="sidebar">
     <div class="nav-header">
-        <button id="new-btn" onclick="startFresh()">+ Initialize Link</button>
+        <button id="new-btn" onclick="startFresh()">+ NEW NEURAL LINK</button>
+        <div id="mem-trigger" onclick="toggleMem()">[ ACCESS CORE DATA ]</div>
     </div>
     <div id="chat-list"></div>
 </div>
 
 <div id="app">
     <div id="terminal">
-        <header>
-            <div style="color: var(--cyan); font-weight: bold; letter-spacing: 3px; font-size: 0.9rem;">ATLAS V3.0</div>
-            <div id="status" style="font-size: 0.65rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px;">Neural Link Stable</div>
+        <header style="padding: 15px 25px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between;">
+            <div style="color: var(--cyan); font-weight: bold; letter-spacing: 3px;">ATLAS V3.0</div>
+            <div id="status" style="font-size: 0.7rem; opacity: 0.5;">SYNCED</div>
         </header>
         <div id="feed"></div>
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="Sync your thoughts..." autocomplete="off">
-        </div>
+        <div class="input-area"><input type="text" id="userInput" placeholder="Type a message..." autocomplete="off"></div>
     </div>
 </div>
 
 <script>
-    // --- Visual Engine ---
     const canvas = document.getElementById('starfield');
     const ctx = canvas.getContext('2d');
     let stars = [];
     function init() {
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        stars = Array.from({length: 200}, () => ({
-            x: Math.random()*canvas.width, 
-            y: Math.random()*canvas.height, 
-            s: Math.random()*1.8, 
-            v: Math.random()*0.6
-        }));
+        stars = Array.from({length: 150}, () => ({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*1.5, v: Math.random()*0.4}));
     }
     function draw() {
         ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="#fff";
-        stars.forEach(s => {
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill();
-            s.y += s.v; if(s.y > canvas.height) s.y = 0;
-        });
+        stars.forEach(s => { ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill(); s.y += s.v; if(s.y > canvas.height) s.y = 0; });
         requestAnimationFrame(draw);
     }
-    init(); draw(); window.onresize = init;
+    init(); draw();
 
-    // --- Neural Logic & Persistence ---
     let chats = JSON.parse(localStorage.getItem('atlas_v3_data')) || [];
-    let globalMemory = localStorage.getItem('atlas_permanent_memory') || "Establishment phase.";
+    let globalMemory = localStorage.getItem('atlas_permanent_memory') || "The user is the primary operator.";
     let activeId = null;
 
     function save() {
@@ -168,10 +101,22 @@
         render();
     }
 
+    function toggleMem() {
+        const modal = document.getElementById('mem-modal');
+        document.getElementById('mem-area').value = globalMemory;
+        modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function saveManualMem() {
+        globalMemory = document.getElementById('mem-area').value;
+        save();
+        toggleMem();
+        document.getElementById('status').innerText = "CORE DATA REWRITTEN";
+    }
+
     function startFresh() {
         activeId = null;
         document.getElementById('feed').innerHTML = '';
-        document.getElementById('status').innerText = "Awaiting New Sync";
         render();
     }
 
@@ -181,10 +126,7 @@
         chats.forEach(c => {
             const el = document.createElement('div');
             el.className = `chat-item ${c.id === activeId ? 'active' : ''}`;
-            el.innerHTML = `
-                <span onclick="load(${c.id})">${c.name}</span>
-                <span class="del-btn" onclick="remove(${c.id})">×</span>
-            `;
+            el.innerHTML = `<span onclick="load(${c.id})">${c.name}</span> <span onclick="remove(${c.id})" style="opacity:0.3">×</span>`;
             list.appendChild(el);
         });
     }
@@ -211,7 +153,7 @@
         let isNew = false;
         if(activeId === null) {
             activeId = Date.now();
-            chats.unshift({ id: activeId, name: "New Sync...", history: [] });
+            chats.unshift({ id: activeId, name: "Neural Sync...", history: [] });
             isNew = true;
         }
 
@@ -219,27 +161,21 @@
         addUI(text, 'user');
         chat.history.push({ role: 'user', text });
         input.value = '';
-        document.getElementById('status').innerText = "EXTRACTING DATA...";
+        document.getElementById('status').innerText = "EXTRACTING DETAILS...";
 
         try {
             const res = await fetch('/api/sync', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    prompt: text, 
-                    history: chat.history, 
-                    globalMemory: globalMemory, 
-                    generateTitle: isNew 
-                })
+                body: JSON.stringify({ prompt: text, history: chat.history, globalMemory, generateTitle: isNew })
             });
             const data = await res.json();
             
-            // Deep Detail Extraction
             if (data.memoryUpdate) {
                 globalMemory += ` | ${data.memoryUpdate}`;
-                document.getElementById('status').innerText = "CORE SYNCED";
+                document.getElementById('status').innerText = "CORE DATA UPDATED";
             } else {
-                document.getElementById('status').innerText = "CONNECTED";
+                document.getElementById('status').innerText = "STABLE CONNECTION";
             }
 
             if(isNew && data.title) chat.name = data.title;
