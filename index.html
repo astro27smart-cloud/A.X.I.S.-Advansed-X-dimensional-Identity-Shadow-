@@ -75,11 +75,19 @@
     <div class="nav-header">
         <div class="section-label">Dimension Gates</div>
         <div class="gate-grid">
-            <a href="https://openai.com/dall-e-3" target="_blank" class="gate-btn">DALL-E</a>
-            <a href="https://midjourney.com" target="_blank" class="gate-btn">Midjourney</a>
-            <a href="https://runwayml.com" target="_blank" class="gate-btn">Runway</a>
-            <a href="https://sora.com" target="_blank" class="gate-btn">Sora</a>
+            <a href="https://chatgpt.com/images" target="_blank" class="gate-btn">DALL-E</a>
+            <a href="https://midjourney.com" target="_blank" class="gate-btn">MIDJOURNEY</a>
+            <a href="https://runwayml.com" target="_blank" class="gate-btn">RUNWAY</a>
+            <a href="https://sora.com" target="_blank" class="gate-btn">SORA</a>
         </div>
+        <div class="section-label">Identity Core</div>
+        <div class="core-btn-group">
+            <button class="action-btn" onclick="startFresh()">+ Initialize_Pulse</button>
+            <button class="action-btn" id="db-btn" onclick="openDB()">[ IDENTITY_ROOT ]</button>
+        </div>
+    </div>
+    <div id="chat-list"></div>
+</div>
         
         <div class="section-label">Identity Core</div>
         <button id="new-btn" onclick="startFresh()">Initialize Link</button>
@@ -128,15 +136,33 @@
         renderSidebar();
     }
 
-    function renderSidebar() {
-        const list = document.getElementById('chat-list'); list.innerHTML = '<div class="section-label">Memory Fragments</div>';
-        chats.slice(0, 10).forEach(c => {
-            const el = document.createElement('div');
-            el.style = "padding: 12px 0; font-size: 0.65rem; color: #444; cursor: pointer; border-bottom: 1px solid #111; text-transform: uppercase; letter-spacing: 1px;";
-            el.innerText = c.name; el.onclick = () => loadChat(c.id);
-            list.appendChild(el);
-        });
-    }
+  function renderSidebar() {
+    const list = document.getElementById('chat-list');
+    list.innerHTML = '<div class="section-label">Memory Fragments</div>';
+    
+    // This part generates the 3 dots you see in your fragments list
+    chats.forEach(c => {
+        const el = document.createElement('div');
+        el.className = `chat-item ${c.id === activeId ? 'active' : ''}`;
+        el.innerHTML = `
+            <div class="chat-name" onclick="loadChat(${c.id})">${c.name}</div>
+            <div class="core-menu-dots" onclick="event.stopPropagation(); toggleDots(${c.id})">⋮</div>
+            <div class="chat-controls" id="tray-${c.id}">
+                <span class="control-btn" onclick="event.stopPropagation(); pinChat(${c.id})">📌</span>
+                <span class="control-btn" onclick="event.stopPropagation(); renameChat(${c.id})">✎</span>
+                <span class="control-btn" onclick="event.stopPropagation(); deleteChat(${c.id})">×</span>
+            </div>`;
+        list.appendChild(el);
+    });
+}
+
+// Add this helper function right below renderSidebar
+function toggleDots(id) {
+    const tray = document.getElementById(`tray-${id}`);
+    const allTrays = document.querySelectorAll('.chat-controls');
+    allTrays.forEach(t => { if(t !== tray) t.classList.remove('visible'); });
+    tray.classList.toggle('visible');
+}
 
     function loadChat(id) {
         activeId = id; const chat = chats.find(c => c.id === id);
